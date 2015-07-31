@@ -1,0 +1,62 @@
+---
+title: "Shiny-Model"
+author: "Eduardo Kamioka - date: Tuesday, May 19, 2015"
+output: html_document
+---
+
+This is a model to build the Shiny interactive app.
+
+```{r, echo= FALSE, results='hide', warning=FALSE, include=FALSE}
+## Setting the enviroment and initial data
+library(data.table)
+library(ggplot2)
+library(gridExtra)
+require(reshape2)
+
+dt = data.table(read.csv('../../../data/Analysis/BR - Transforms/all-produc-clima.csv'
+                         , sep = ","
+                         , header = TRUE
+                         , stringsAsFactors = FALSE)[,2:16])
+
+dtx = melt(dt, id = c("UF","Year")) # reshaping the data set from wide to long
+
+dtx$Type =ifelse(substr(dtx$variable, start = 1,stop = 5) == "Produ"
+                 ,"Prod" ,"Clima") # classifying if type is Production or Climate
+
+# testing parameters
+pd = position_dodge(.1)
+cultivar = "Cana"
+varUF = "SP"
+
+switch(cultivar,
+       "Algodão" = (col = "ProducCarAlg"),
+       "Café" = (col = "ProduCafe"),
+       "Cana" = (col = "ProduCana"),
+       "Milho" = (col = "ProduMilho"),
+       "Soja" = (col = "ProduSoja"),
+       "Trigo" = (col = "ProduTrigo")
+)
+
+```
+
+## Time series:
+
+```{r, echo=FALSE, warning=FALSE}
+
+ggplot(aes(x = Year, y = value/10^3), data = subset(dtx, Type == "Prod" & UF == varUF & variable == col)) + 
+        facet_grid(variable ~ ., scales = "free") +
+        geom_line() +
+        scale_x_continuous(breaks = c(2000:2015,1000)) +
+        geom_point() +
+        ylab("Produção (Milões de toneladas)") +
+        ggtitle(paste("Produção - ",cultivar," - Safras de 2000/01 a 2014/15"))
+
+ggplot(aes(x = Year, y = value), data = subset(dtx, Type == "Clima" & UF == varUF)) + 
+        facet_grid(variable ~ ., scales = "free") +
+        geom_line() +
+        scale_x_continuous(breaks = c(2000:2015,1000)) +
+        geom_point()
+
+#grid.arrange(p1, p2, ncol = 1, )
+```
+

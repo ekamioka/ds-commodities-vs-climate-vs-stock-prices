@@ -1,0 +1,137 @@
+---
+title: "transforming-dataset-producao-clima"
+author: "Eduardo Kamioka"
+date: "Monday, May 18, 2015"
+output: html_document
+---
+
+Este arquivo registra:
+
+1 - O procedimento para a consolidação (merge) do data set de produção, ou seja, somente as
+variáveis de produção para todos os cultivares;
+
+2 - O procedimento para a consolidação (merge) da produção com os dados de clima
+
+Como saídas, são gerados dois arquivos:
+
+- all-produc.csv (consolidação dos dados de produção de todos cultivares)
+
+- all-produc-clima.csv (consolidação do arquivo anterior com dados de clima)
+
+```{r}
+library(data.table)
+
+## Reading production data for Cotton 
+dt_prod = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/algodao/producao_algodao_uf.csv'
+                         , sep = ","
+                         , header = TRUE
+                         , stringsAsFactors = FALSE)[,c(2,3,9,11)])
+
+dt_prod$Year = as.integer(substr(dt_prod$Safra, start = 1,stop = 4))
+
+
+#### COFFEE ####
+
+## Reading production data for Coffee 
+dt_tmp = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/cafe/producao_cafe_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,c(2,3,6)])
+
+dt_tmp$Year = as.integer(substr(dt_tmp$Safra, start = 1,stop = 4))
+
+setnames(dt_tmp, c("UF", "Safra", "ProduCafe", "Year"))
+
+## Merging production data from Coffee to Cotton 
+dt = merge(dt_prod[,-2,with = FALSE] # subsetting without the column Safra
+           , dt_tmp[,-2, with = FALSE] # subsetting without the column Safra
+           , by = c("Year","UF"), all = TRUE) # merging by Year and UF
+
+#### SUGAR KANE ####
+
+## Reading production data for Sugar Kane
+dt_tmp = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/cana/producao_cana_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,c(2,3,6)])
+
+dt_tmp$Year = as.integer(substr(dt_tmp$Safra, start = 1,stop = 4))
+
+setnames(dt_tmp, c("UF", "Safra", "ProduCana", "Year"))
+
+## Merging production data from Sugar Kane to Coffee and Cotton 
+dt = merge(dt
+           , dt_tmp[,-2, with = FALSE] # subsetting without the column Safra
+           , by = c("Year","UF"), all = TRUE) # merging by Year and UF
+
+#### CORN ####
+
+## Reading production data for Corn
+dt_tmp = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/milho/producao_milho_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,c(2,3,6)])
+
+dt_tmp$Year = as.integer(substr(dt_tmp$Safra, start = 1,stop = 4))
+
+setnames(dt_tmp, c("UF", "Safra", "ProduMilho", "Year"))
+
+## Merging production data from Corn to Sugar Kane, Coffee and Cotton 
+dt = merge(dt
+           , dt_tmp[,-2, with = FALSE] # subsetting without the column Safra
+           , by = c("Year","UF"), all = TRUE) # merging by Year and UF
+
+#### SOY ####
+
+## Reading production data for Soy
+dt_tmp = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/soja/producao_soja_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,c(2,3,6)])
+
+dt_tmp$Year = as.integer(substr(dt_tmp$Safra, start = 1,stop = 4))
+
+setnames(dt_tmp, c("UF", "Safra", "ProduSoja", "Year"))
+
+## Merging production data from Soy to Corn, Sugar Kane, Coffee and Cotton 
+dt = merge(dt
+           , dt_tmp[,-2, with = FALSE] # subsetting without the column Safra
+           , by = c("Year","UF"), all = TRUE) # merging by Year and UF
+
+#### WHEAT ####
+
+## Reading production data for Wheat
+dt_tmp = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/trigo/producao_trigo_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,c(2,3,6)])
+
+dt_tmp$Year = as.integer(substr(dt_tmp$Safra, start = 1,stop = 4))
+
+setnames(dt_tmp, c("UF", "Safra", "ProduTrigo", "Year"))
+
+## Merging production data from Soy to Corn, Sugar Kane, Coffee and Cotton 
+dt = merge(dt
+           , dt_tmp[,-2, with = FALSE] # subsetting without the column Safra
+           , by = c("Year","UF"), all = TRUE) # merging by Year and UF
+
+# Saving the data set 
+write.csv(dt, file = "../../../data/Analysis/BR - Transforms/all-produc.csv")
+
+```
+
+Consolidando (merge) os dados de clima aos dados de produção
+
+```{r}
+## Reading climate data 
+dt_clima = data.table(read.csv('../../../data/Analysis/BR - Clima/clima-mean-by-UF.csv'
+              , sep = ","
+              , header = TRUE
+              , stringsAsFactors = FALSE)[,2:9])
+
+## Merging UF column from station details data
+dt = merge(dt_clima, dt, by = c("Year","UF"), all = TRUE)
+
+write.csv(dt, file = "../../../data/Analysis/BR - Transforms/all-produc-clima.csv")
+```
+

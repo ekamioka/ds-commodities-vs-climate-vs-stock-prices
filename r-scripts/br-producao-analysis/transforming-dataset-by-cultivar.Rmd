@@ -1,0 +1,112 @@
+---
+title: "Transforming-dataset-by-product"
+author: "Eduardo Kamioka"
+date: "Monday, May 18, 2015"
+output: html_document
+---
+
+Este arquivo registra os procedimentos para consolidação dos dados de clima aos dados de produção
+
+Para cada cultivar, será gerado o respectivo consolidado entre dados de produção e dados de clima 
+
+```{r}
+library(data.table)
+
+## Reading climate data 
+dt_clima = data.table(read.csv('../../../data/Analysis/BR - Clima/clima-mean-by-UF.csv'
+              , sep = ","
+              , header = TRUE
+              , stringsAsFactors = FALSE)[,2:9])
+
+#### COTTON ####
+
+## Reading production data for Cotton 
+dt_prod = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/algodao/producao_algodao_uf.csv'
+                         , sep = ","
+                         , header = TRUE
+                         , stringsAsFactors = FALSE)[,2:11])
+
+dt_prod$Year = as.integer(substr(dt_prod$Safra, start = 1,stop = 4))
+
+## Merging UF column from station details data
+dt = merge(dt_clima, dt_prod, by = c("Year","UF"), all = TRUE)
+
+write.csv2(dt, file = "../../../data/Analysis/BR - Transforms/algodao.csv")
+
+#### COFFEE ####
+
+## Reading production data for Coffee 
+dt_prod = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/cafe/producao_cafe_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,2:6])
+
+dt_prod$Year = as.integer(substr(dt_prod$Safra, start = 1,stop = 4))
+
+## Merging UF column from station details data
+dt = merge(dt_clima, dt_prod, by = c("Year","UF"), all = TRUE)
+
+write.csv2(dt, file = "../../../data/Analysis/BR - Transforms/cafe.csv")
+
+#### SUGAR KANE ####
+
+## Reading production data for Sugar Kane
+dt_prod = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/cana/producao_cana_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,2:10])
+
+dt_prod$Year = as.integer(substr(dt_prod$Safra, start = 1,stop = 4))
+
+## Merging UF column from station details data
+dt = merge(dt_clima, dt_prod, by = c("Year","UF"), all = TRUE)
+
+write.csv2(dt, file = "../../../data/Analysis/BR - Transforms/cana.csv")
+
+#### CORN ####
+
+## Reading production data for Corn
+dt_prod = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/milho/producao_milho_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,2:6])
+
+dt_prod$Year = as.integer(substr(dt_prod$Safra, start = 1,stop = 4))
+
+## Merging UF column from station details data
+dt = merge(dt_clima, dt_prod, by = c("Year","UF"), all = TRUE)
+
+write.csv2(dt, file = "../../../data/Analysis/BR - Transforms/milho.csv")
+
+#### SOY ####
+
+## Reading production data for Soy
+dt_prod = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/soja/producao_soja_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,2:6])
+
+dt_prod$Year = as.integer(substr(dt_prod$Safra, start = 1,stop = 4))
+
+## Merging UF column from station details data
+dt = merge(dt_clima, dt_prod, by = c("Year","UF"), all = TRUE)
+
+write.csv2(dt, file = "../../../data/Analysis/BR - Transforms/soja.csv")
+
+#### WHEAT ####
+
+## Reading production data for Wheat
+dt_prod = data.table(read.csv('../../../data/Getting and cleaning/BR - producao/trigo/producao_trigo_uf.csv'
+                              , sep = ","
+                              , header = TRUE
+                              , stringsAsFactors = FALSE)[,2:6])
+
+dt_prod$Year = as.integer(substr(dt_prod$Safra, start = 1,stop = 4))
+
+## Merging UF column from station details data
+dt = merge(dt_clima, dt_prod, by = c("Year","UF"), all = TRUE)
+
+write.csv2(dt, file = "../../../data/Analysis/BR - Transforms/trigo.csv")
+
+
+```
